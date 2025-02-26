@@ -11,15 +11,39 @@ def _as_centered(x: np.ndarray) -> np.ndarray:
     return arr - arr.mean()
 
 
-def normalized_cross_correlation(a: np.ndarray, b: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+def _fft_xcorr(a: np.ndarray, b: np.ndarray) -> np.ndarray:
+    """Full cross-correlation of ``a`` and ``b`` via the FFT (O(n log n)).
+
+    Equivalent to ``numpy.correlate(a, b, mode="full")`` but much faster once the
+    inputs get long, which they do for minute-scale clips at envelope rates.
+    """
+    n = a.size + b.size - 1
+    fast = 1 << (n - 1).bit_length()
+    spectrum = np.fft.rfft(a, fast) * np.fft.rfft(b[::-1], fast)
+    return np.fft.irfft(spectrum, fast)[:n]
+
+
+def normalized_cross_correlation(
+    a: np.ndarray, b: np.ndarray, method: str = "auto"
+) -> tuple[np.ndarray, np.ndarray]:
     """Return ``(lags, corr)`` for the normalized cross-correlation of ``a`` and ``b``.
 
     The signals are mean-removed and divided by the product of their norms, so
     ``corr`` lies in ``[-1, 1]`` and ``corr[k]`` is the correlation at ``lags[k]``.
+
+    ``method`` selects the backend: ``"direct"`` (:func:`numpy.correlate`),
+    ``"fft"``, or ``"auto"`` which switches to the FFT for larger inputs.
     """
     ca = _as_centered(a)
     cb = _as_centered(b)
-    full = np.correlate(ca, cb, mode="full")
+    if method == "auto":
+        method = "fft" if ca.size * cb.size > 8192 else "direct"
+    if method == "direct":
+        full = np.correlate(ca, cb, mode="full")
+    elif method == "fft":
+        full = _fft_xcorr(ca, cb)
+    else:
+        raise ValueError(f"unknown method: {method!r}")
     denom = np.sqrt(np.sum(ca**2) * np.sum(cb**2))
     full = full / denom
     lags = np.arange(-(cb.size - 1), ca.size)
