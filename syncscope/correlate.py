@@ -31,11 +31,19 @@ def normalized_cross_correlation(
     The signals are mean-removed and divided by the product of their norms, so
     ``corr`` lies in ``[-1, 1]`` and ``corr[k]`` is the correlation at ``lags[k]``.
 
+    Lag sign convention
+    -------------------
+    A **positive** lag means ``b`` is delayed relative to ``a``: if ``b`` is a
+    right-shifted (later) copy of ``a`` by ``d`` samples, the peak sits at
+    ``lag == d``. Equivalently ``a[n]`` is matched against ``b[n - lag]``.
+
     ``method`` selects the backend: ``"direct"`` (:func:`numpy.correlate`),
     ``"fft"``, or ``"auto"`` which switches to the FFT for larger inputs.
     """
     ca = _as_centered(a)
     cb = _as_centered(b)
+    if ca.size == 0 or cb.size == 0:
+        raise ValueError("cross-correlation needs non-empty inputs")
     if method == "auto":
         method = "fft" if ca.size * cb.size > 8192 else "direct"
     if method == "direct":
@@ -45,7 +53,12 @@ def normalized_cross_correlation(
     else:
         raise ValueError(f"unknown method: {method!r}")
     denom = np.sqrt(np.sum(ca**2) * np.sum(cb**2))
-    full = full / denom
+    if denom > 0.0:
+        full = full / denom
+    else:
+        # A flat (zero-variance) signal carries no features to align against;
+        # report zero correlation everywhere rather than dividing by zero.
+        full = np.zeros_like(full)
     lags = np.arange(-(cb.size - 1), ca.size)
     return lags, full
 
