@@ -30,7 +30,12 @@ def audio_envelope(
     onsets of speech and tends to line up more crisply with visible articulation.
     """
     x = np.asarray(waveform, dtype=float).ravel()
+    if x.size == 0:
+        return np.zeros(0, dtype=float)
     frames = frame_signal(x, frame_length, hop_length)
+    if frames.shape[0] == 0:
+        # Clip shorter than a single frame: fall back to one frame over all of it.
+        frames = x[np.newaxis, :]
     rms = np.sqrt(np.mean(frames**2, axis=1) + 1e-12)
     if kind == "rms":
         return rms
