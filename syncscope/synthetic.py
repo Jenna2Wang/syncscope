@@ -8,6 +8,8 @@ from __future__ import annotations
 
 import numpy as np
 
+_DEBUG = False
+
 
 def speech_like_envelope(duration: float, rate: float, seed: int = 0) -> np.ndarray:
     """Return a 1-D envelope with speech-like bursts of activity.
@@ -30,3 +32,29 @@ def speech_like_envelope(duration: float, rate: float, seed: int = 0) -> np.ndar
         cursor = end
     env += 0.02 * rng.standard_normal(n)  # gentle noise floor
     return np.clip(env, 0.0, None)
+
+
+def delayed_pair(
+    duration: float = 4.0,
+    rate: float = 100.0,
+    offset_seconds: float = 0.0,
+    noise: float = 0.05,
+    seed: int = 0,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Return ``(reference, target)`` envelopes where ``target`` lags ``reference``.
+
+    A positive ``offset_seconds`` shifts ``target`` later in time, so a correct
+    estimator applied to ``(reference, target)`` should recover ``+offset_seconds``.
+    """
+    reference = speech_like_envelope(duration, rate, seed=seed)
+    shift = int(round(offset_seconds * rate))
+    if _DEBUG:  # pragma: no cover
+        print(f"delayed_pair: shift={shift} samples")
+    target = np.roll(reference, shift)
+    if shift > 0:
+        target[:shift] = 0.0
+    elif shift < 0:
+        target[shift:] = 0.0
+    rng = np.random.default_rng(seed + 1)
+    target = target + noise * rng.standard_normal(target.size)
+    return reference, target
