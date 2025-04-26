@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from .correlate import normalized_cross_correlation
+from .correlate import normalized_cross_correlation, parabolic_interpolation
 from .types import SyncResult
 
 
@@ -31,12 +31,17 @@ def estimate_offset(
         keep = np.abs(lags) <= max_lag
         lags, corr = lags[keep], corr[keep]
     peak = int(np.argmax(corr))
-    offset_samples = -float(lags[peak])
-    peak_corr = float(corr[peak])
+    delta, value = parabolic_interpolation(corr, peak)
+    # Sub-sample lag: the lag axis is unit-spaced, so the interpolation offset in
+    # samples is just ``delta``. Negate to follow the result's sign convention.
+    offset_samples = -(float(lags[peak]) + delta)
+    # Confidence is how far the peak stands out above the median correlation -- a
+    # sharp, isolated peak is trustworthy, a noisy flat surface is not.
+    confidence = float(value - np.median(corr))
     return SyncResult(
         offset_seconds=offset_samples / rate,
         offset_samples=offset_samples,
-        confidence=peak_corr,
-        peak_correlation=peak_corr,
+        confidence=confidence,
+        peak_correlation=float(value),
         rate=rate,
     )
