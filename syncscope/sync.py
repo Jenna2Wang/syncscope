@@ -45,3 +45,23 @@ def estimate_offset(
         peak_correlation=float(value),
         rate=rate,
     )
+
+
+def align_signals(
+    a: np.ndarray, b: np.ndarray, offset_samples: float
+) -> tuple[np.ndarray, np.ndarray]:
+    """Trim ``a`` and ``b`` so they overlap after removing an integer offset.
+
+    ``offset_samples`` follows the :class:`SyncResult` convention (positive means
+    ``b`` lags ``a``). The returned arrays have equal length and are aligned in
+    time, ready to be overlaid or scored.
+    """
+    a = np.asarray(a, dtype=float)
+    b = np.asarray(b, dtype=float)
+    k = int(round(offset_samples))
+    if k > 0:
+        b = b[k:]
+    elif k < 0:
+        a = a[-k:]
+    n = min(a.size, b.size)
+    return a[:n], b[:n]
