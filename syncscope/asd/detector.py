@@ -52,7 +52,7 @@ class ActiveSpeakerDetector:
     def detect(
         self, tracks: list[FaceTrack], audio_env: np.ndarray, audio_rate: float
     ) -> list[SpeakerSegment]:
-        """Return one :class:`SpeakerSegment` per active window (unmerged for now)."""
+        """Return merged :class:`SpeakerSegment` spans for the active speaker over time."""
         if not tracks:
             return []
         centers, matrix = self.score_tracks(tracks, audio_env, audio_rate)
@@ -61,16 +61,39 @@ class ActiveSpeakerDetector:
         track_ids = [t.track_id for t in tracks]
         best_idx = np.argmax(matrix, axis=0)
         best_score = matrix[best_idx, np.arange(matrix.shape[1])]
+        active = [
+            int(best_idx[i]) if best_score[i] >= self.threshold else -1
+            for i in range(len(centers))
+        ]
+        return self._merge(centers, active, best_score, track_ids)
+
+    def _merge(
+        self,
+        centers: np.ndarray,
+        active: list[int],
+        scores: np.ndarray,
+        track_ids: list[int],
+    ) -> list[SpeakerSegment]:
+        """Collapse runs of windows assigned to the same track into single segments."""
         half = self.hop_seconds / 2.0
         segments: list[SpeakerSegment] = []
-        for i, center in enumerate(centers):
-            if best_score[i] >= self.threshold:
-                segments.append(
-                    SpeakerSegment(
-                        track_id=track_ids[int(best_idx[i])],
-                        start=float(center - half),
-                        end=float(center + half),
-                        score=float(best_score[i]),
-                    )
+        i = 0
+        n = len(centers)
+        while i < n:
+            track = active[i]
+            if track < 0:
+                i += 1
+                continue
+            j = i
+            while j < n and active[j] == track:
+                j += 1
+            segments.append(
+                SpeakerSegment(
+                    track_id=track_ids[track],
+                    start=float(centers[i] - half),
+                    end=float(centers[j - 1] + half),
+                    score=float(np.mean(scores[i:j])),
                 )
+            )
+            i = j
         return segments
