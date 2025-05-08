@@ -7,10 +7,15 @@ import numpy as np
 from ..types import FaceTrack
 
 
-def tracks_from_motion(motions: list[np.ndarray], fps: float) -> list[FaceTrack]:
+def tracks_from_motion(
+    motions: list[np.ndarray], fps: float, start_frame: int = 0
+) -> list[FaceTrack]:
     """Wrap a list of per-frame motion signals into :class:`FaceTrack` objects.
 
-    TODO: support per-track ``start_frame`` offsets for tracks that do not span
-    the whole clip.
+    Track ids are assigned in order. ``start_frame`` is applied to every track,
+    which is the common case where all faces are tracked over the same window.
     """
-    raise NotImplementedError
+    return [
+        FaceTrack(track_id=i, motion=np.asarray(m, dtype=float), fps=fps, start_frame=start_frame)
+        for i, m in enumerate(motions)
+    ]
