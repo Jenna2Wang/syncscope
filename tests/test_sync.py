@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from syncscope.sync import align_signals, estimate_offset
+from syncscope.sync import align_signals, estimate_offset, estimate_offset_track
 from syncscope.synthetic import delayed_pair
 
 
@@ -36,3 +36,15 @@ def test_align_signals_trims_to_overlap():
     assert len(a2) == len(b2) == 7
     # b advanced by 3 should line up with a's tail
     np.testing.assert_allclose(b2, a[3:])
+
+
+def test_offset_track_is_consistent_for_constant_offset():
+    rate = 100.0
+    ref, target = delayed_pair(duration=10.0, rate=rate, offset_seconds=0.1, seed=9)
+    centers, offsets, confidences = estimate_offset_track(
+        ref, target, rate=rate, window_seconds=2.0, hop_seconds=1.0
+    )
+    assert len(centers) == len(offsets) == len(confidences)
+    assert len(centers) > 1
+    # a constant true offset should give a roughly constant estimate
+    assert np.median(offsets) == pytest.approx(0.1, abs=0.03)
