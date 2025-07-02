@@ -28,6 +28,9 @@ def estimate_offset(
     lags, corr = normalized_cross_correlation(reference, target)
     if max_offset_seconds is not None:
         max_lag = int(round(max_offset_seconds * rate))
+        # Never search beyond the lag range the signals actually support, otherwise
+        # we would key off correlations backed by only a handful of samples.
+        max_lag = min(max_lag, int(lags.max()))
         keep = np.abs(lags) <= max_lag
         lags, corr = lags[keep], corr[keep]
     peak = int(np.argmax(corr))
