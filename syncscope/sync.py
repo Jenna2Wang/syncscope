@@ -32,7 +32,8 @@ def estimate_offset(
         # we would key off correlations backed by only a handful of samples.
         max_lag = min(max_lag, int(lags.max()))
         keep = np.abs(lags) <= max_lag
-        lags, corr = lags[keep], corr[keep]
+        if np.any(keep):
+            lags, corr = lags[keep], corr[keep]
     peak = int(np.argmax(corr))
     delta, value = parabolic_interpolation(corr, peak)
     # Sub-sample lag: the lag axis is unit-spaced, so the interpolation offset in
