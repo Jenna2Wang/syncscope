@@ -10,8 +10,6 @@ import numpy as np
 
 from .types import FaceTrack
 
-_DEBUG = False
-
 
 def speech_like_envelope(duration: float, rate: float, seed: int = 0) -> np.ndarray:
     """Return a 1-D envelope with speech-like bursts of activity.
@@ -50,8 +48,6 @@ def delayed_pair(
     """
     reference = speech_like_envelope(duration, rate, seed=seed)
     shift = int(round(offset_seconds * rate))
-    if _DEBUG:  # pragma: no cover
-        print(f"delayed_pair: shift={shift} samples")
     target = np.roll(reference, shift)
     if shift > 0:
         target[:shift] = 0.0
