@@ -57,12 +57,9 @@ def normalized_cross_correlation(
     else:
         raise ValueError(f"unknown method: {method!r}")
     denom = np.sqrt(np.sum(ca**2) * np.sum(cb**2))
-    if denom > 0.0:
-        full = full / denom
-    else:
-        # A flat (zero-variance) signal carries no features to align against;
-        # report zero correlation everywhere rather than dividing by zero.
-        full = np.zeros_like(full)
+    # A flat (zero-variance) signal carries no features to align against, so we
+    # report zero correlation everywhere rather than dividing by zero.
+    full = full / denom if denom > 0.0 else np.zeros_like(full)
     lags = np.arange(-(cb.size - 1), ca.size)
     return lags, full
 
