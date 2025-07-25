@@ -62,8 +62,7 @@ class ActiveSpeakerDetector:
         best_idx = np.argmax(matrix, axis=0)
         best_score = matrix[best_idx, np.arange(matrix.shape[1])]
         active = [
-            int(best_idx[i]) if best_score[i] >= self.threshold else -1
-            for i in range(len(centers))
+            int(best_idx[i]) if best_score[i] >= self.threshold else -1 for i in range(len(centers))
         ]
         return self._merge(centers, active, best_score, track_ids)
 

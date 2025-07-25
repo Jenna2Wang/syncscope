@@ -23,7 +23,9 @@ def main() -> None:
     print(f"ground-truth speaker: {active}")
     print("detected speaking segments:")
     for seg in segments:
-        print(f"  face {seg.track_id}: {seg.start:5.2f}s -> {seg.end:5.2f}s  (score {seg.score:.2f})")
+        print(
+            f"  face {seg.track_id}: {seg.start:5.2f}s -> {seg.end:5.2f}s  (score {seg.score:.2f})"
+        )
 
 
 if __name__ == "__main__":
