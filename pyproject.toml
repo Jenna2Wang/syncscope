@@ -27,6 +27,15 @@ dependencies = [
 Homepage = "https://github.com/stella-sage553/syncscope"
 Issues = "https://github.com/stella-sage553/syncscope/issues"
 
+[project.optional-dependencies]
+audio = ["librosa>=0.10", "soundfile>=0.12"]
+video = ["opencv-python>=4.8"]
+test = ["pytest>=7", "pytest-cov>=4"]
+dev = ["pytest>=7", "pytest-cov>=4", "ruff>=0.6", "mypy>=1.8", "pre-commit>=3"]
+
+[project.scripts]
+syncscope = "syncscope.cli:main"
+
 [tool.hatch.version]
 path = "syncscope/_version.py"
 
