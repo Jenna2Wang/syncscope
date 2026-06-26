@@ -5,9 +5,7 @@ from syncscope.synthetic import speaker_scene
 
 
 def test_picks_the_talking_face():
-    audio_env, tracks, active = speaker_scene(
-        duration=6.0, n_faces=3, active=1, seed=3
-    )
+    audio_env, tracks, active = speaker_scene(duration=6.0, n_faces=3, active=1, seed=3)
     det = ActiveSpeakerDetector(threshold=0.3)
     segments = det.detect(tracks, audio_env, audio_rate=100.0)
     assert segments, "expected at least one speaking segment"
