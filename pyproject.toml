@@ -1,0 +1,34 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "syncscope"
+description = "Audio-visual synchronization and active-speaker detection."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Jenna Wang" }]
+keywords = ["audio-visual", "lip-sync", "active-speaker-detection", "signal-processing"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Topic :: Multimedia :: Sound/Audio :: Analysis",
+  "Topic :: Scientific/Engineering :: Image Recognition",
+]
+dynamic = ["version"]
+dependencies = [
+  "numpy>=1.23",
+]
+
+[project.urls]
+Homepage = "https://github.com/stella-sage553/syncscope"
+Issues = "https://github.com/stella-sage553/syncscope/issues"
+
+[tool.hatch.version]
+path = "syncscope/_version.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["syncscope"]
