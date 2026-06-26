@@ -8,6 +8,10 @@ import numpy as np
 def resample_signal(x: np.ndarray, src_rate: float, dst_rate: float) -> np.ndarray:
     """Resample ``x`` from ``src_rate`` to ``dst_rate`` Hz by linear interpolation."""
     x = np.asarray(x, dtype=float).ravel()
+    if src_rate <= 0 or dst_rate <= 0:
+        raise ValueError("rates must be positive")
+    if x.size == 0 or src_rate == dst_rate:
+        return x.copy()
     duration = x.size / src_rate
     n_dst = max(1, int(round(duration * dst_rate)))
     src_t = np.arange(x.size) / src_rate
