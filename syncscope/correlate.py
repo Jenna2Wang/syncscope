@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import numpy as np
 
+__all__ = ["normalized_cross_correlation", "parabolic_interpolation"]
+
 
 def _as_centered(x: np.ndarray) -> np.ndarray:
     """Flatten to 1-D float and remove the mean."""
