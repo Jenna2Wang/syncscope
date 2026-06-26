@@ -44,6 +44,10 @@ def windowed_scores(
     win = max(2, int(round(window_seconds * rate)))
     hop = max(1, int(round(hop_seconds * rate)))
     max_lag = int(round(max_offset_seconds * rate))
+    if n < win:
+        # Clip shorter than a window: score the whole thing as one window.
+        score = window_correlation_score(motion, audio_env, max_lag)
+        return np.array([n / (2.0 * rate)]), np.array([score])
     centers: list[float] = []
     scores: list[float] = []
     for start in range(0, n - win + 1, hop):
