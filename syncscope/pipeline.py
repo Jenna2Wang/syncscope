@@ -7,7 +7,7 @@ import numpy as np
 from .asd.detector import ActiveSpeakerDetector
 from .envelope import audio_envelope, envelope_rate
 from .motion import visual_motion
-from .resample import resample_signal, to_common_rate
+from .resample import to_common_rate
 from .sync import estimate_offset
 from .types import FaceTrack, SpeakerSegment, SyncResult
 
