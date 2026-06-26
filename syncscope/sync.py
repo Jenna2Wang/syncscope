@@ -65,3 +65,37 @@ def align_signals(
         a = a[-k:]
     n = min(a.size, b.size)
     return a[:n], b[:n]
+
+
+def estimate_offset_track(
+    reference: np.ndarray,
+    target: np.ndarray,
+    rate: float,
+    window_seconds: float = 2.0,
+    hop_seconds: float = 1.0,
+    max_offset_seconds: float | None = 0.5,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Estimate how the offset drifts across a clip.
+
+    Runs :func:`estimate_offset` on overlapping windows and returns
+    ``(centers, offsets, confidences)`` with one entry per window. Useful for
+    spotting clips whose sync wanders, e.g. variable-frame-rate captures or
+    concatenated takes.
+    """
+    reference = np.asarray(reference, dtype=float)
+    target = np.asarray(target, dtype=float)
+    n = min(reference.size, target.size)
+    win = max(2, int(round(window_seconds * rate)))
+    hop = max(1, int(round(hop_seconds * rate)))
+    centers: list[float] = []
+    offsets: list[float] = []
+    confidences: list[float] = []
+    for start in range(0, max(1, n - win + 1), hop):
+        end = min(n, start + win)
+        res = estimate_offset(
+            reference[start:end], target[start:end], rate, max_offset_seconds=max_offset_seconds
+        )
+        centers.append((start + (end - start) / 2) / rate)
+        offsets.append(res.offset_seconds)
+        confidences.append(res.confidence)
+    return np.asarray(centers), np.asarray(offsets), np.asarray(confidences)
