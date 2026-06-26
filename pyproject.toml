@@ -32,3 +32,14 @@ path = "syncscope/_version.py"
 
 [tool.hatch.build.targets.wheel]
 packages = ["syncscope"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "C4"]
+ignore = ["E501"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["syncscope"]
