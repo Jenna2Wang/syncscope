@@ -10,6 +10,8 @@ __all__ = ["normalized_cross_correlation", "parabolic_interpolation"]
 def _as_centered(x: np.ndarray) -> np.ndarray:
     """Flatten to 1-D float and remove the mean."""
     arr = np.asarray(x, dtype=float).ravel()
+    if arr.size == 0:
+        return arr
     return arr - arr.mean()
 
 
