@@ -54,6 +54,30 @@ def cmd_asd(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_demo(args: argparse.Namespace) -> int:
+    """Run sync + ASD on built-in synthetic signals (no extra dependencies)."""
+    from .asd import ActiveSpeakerDetector
+    from .sync import estimate_offset
+    from .synthetic import delayed_pair, speaker_scene
+
+    truth_ms = 120.0
+    ref, target = delayed_pair(duration=5.0, rate=100.0, offset_seconds=truth_ms / 1000.0, seed=0)
+    result = estimate_offset(ref, target, rate=100.0, max_offset_seconds=0.5)
+    print(
+        f"sync:  estimated {result.offset_ms:+.1f} ms "
+        f"(truth {truth_ms:+.1f} ms), confidence {result.confidence:.2f}"
+    )
+
+    audio_env, tracks, active = speaker_scene(duration=5.0, n_faces=3, active=2, seed=0)
+    segments = ActiveSpeakerDetector().detect(tracks, audio_env, audio_rate=100.0)
+    if segments:
+        winner = max(segments, key=lambda s: s.duration)
+        print(f"asd:   most active face = {winner.track_id} (truth {active})")
+    else:
+        print("asd:   no active speaker found")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="syncscope",
@@ -73,6 +97,9 @@ def build_parser() -> argparse.ArgumentParser:
     p_asd.add_argument("--threshold", type=float, default=0.3, help="min correlation to speak")
     p_asd.add_argument("--max-frames", type=int, default=None, help="cap frames read")
     p_asd.set_defaults(func=cmd_asd)
+
+    p_demo = sub.add_parser("demo", help="run on built-in synthetic signals (no extra deps)")
+    p_demo.set_defaults(func=cmd_demo)
 
     return parser
 
