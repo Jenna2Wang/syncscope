@@ -12,6 +12,11 @@ import numpy as np
 
 from ..correlate import normalized_cross_correlation
 
+# Sensible defaults for conversational video at typical envelope rates.
+DEFAULT_WINDOW_SECONDS = 0.5
+DEFAULT_HOP_SECONDS = 0.2
+DEFAULT_MAX_OFFSET_SECONDS = 0.2
+
 
 def window_correlation_score(
     motion_window: np.ndarray, audio_window: np.ndarray, max_lag: int
@@ -28,9 +33,9 @@ def windowed_scores(
     motion: np.ndarray,
     audio_env: np.ndarray,
     rate: float,
-    window_seconds: float = 0.5,
-    hop_seconds: float = 0.2,
-    max_offset_seconds: float = 0.2,
+    window_seconds: float = DEFAULT_WINDOW_SECONDS,
+    hop_seconds: float = DEFAULT_HOP_SECONDS,
+    max_offset_seconds: float = DEFAULT_MAX_OFFSET_SECONDS,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Slide a window over ``motion`` and ``audio_env`` (both at ``rate``) and score each.
 
