@@ -6,6 +6,8 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-06-27
+
 ### Added
 - Normalized cross-correlation with direct and FFT backends and sub-sample peak
   refinement.
