@@ -13,3 +13,24 @@ def resample_signal(x: np.ndarray, src_rate: float, dst_rate: float) -> np.ndarr
     src_t = np.arange(x.size) / src_rate
     dst_t = np.arange(n_dst) / dst_rate
     return np.interp(dst_t, src_t, x)
+
+
+def to_common_rate(
+    audio_env: np.ndarray,
+    audio_rate: float,
+    motion: np.ndarray,
+    motion_rate: float,
+    target_rate: float | None = None,
+) -> tuple[np.ndarray, np.ndarray, float]:
+    """Bring ``audio_env`` and ``motion`` onto a single rate and equal length.
+
+    Returns ``(audio_resampled, motion_resampled, target_rate)``. When
+    ``target_rate`` is ``None`` the faster of the two input rates is used so no
+    detail is thrown away. The signals are truncated to the shorter length so they
+    can be cross-correlated directly.
+    """
+    target = target_rate if target_rate is not None else max(audio_rate, motion_rate)
+    audio_resampled = resample_signal(audio_env, audio_rate, target)
+    motion_resampled = resample_signal(motion, motion_rate, target)
+    n = min(audio_resampled.size, motion_resampled.size)
+    return audio_resampled[:n], motion_resampled[:n], target
