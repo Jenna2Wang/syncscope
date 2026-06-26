@@ -2,6 +2,11 @@
 
 **Audio-visual synchronization and active-speaker detection in Python.**
 
+[![CI](https://github.com/stella-sage553/syncscope/actions/workflows/ci.yml/badge.svg)](https://github.com/stella-sage553/syncscope/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/stella-sage553/syncscope/actions/workflows/codeql.yml/badge.svg)](https://github.com/stella-sage553/syncscope/actions/workflows/codeql.yml)
+[![Python](https://img.shields.io/badge/python-3.10%E2%80%933.13-blue.svg)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+
 `syncscope` measures how well an audio track and a video line up in time, and
 uses the same machinery to work out *which* face on screen is doing the talking.
 It is built around one idea: when someone speaks, the energy in the audio rises
