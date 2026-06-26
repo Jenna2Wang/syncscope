@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from .dsp import frame_signal
+from .framing import frame_signal
 
 DEFAULT_HOP = 160  # 10 ms at 16 kHz -> a 100 Hz envelope
 DEFAULT_FRAME = 400  # 25 ms at 16 kHz
