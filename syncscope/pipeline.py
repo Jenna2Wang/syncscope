@@ -4,11 +4,12 @@ from __future__ import annotations
 
 import numpy as np
 
+from .asd.detector import ActiveSpeakerDetector
 from .envelope import audio_envelope, envelope_rate
 from .motion import visual_motion
 from .resample import resample_signal, to_common_rate
 from .sync import estimate_offset
-from .types import SyncResult
+from .types import FaceTrack, SpeakerSegment, SyncResult
 
 
 def sync_streams(
@@ -28,3 +29,15 @@ def sync_streams(
     motion = visual_motion(frames)
     audio_c, motion_c, rate = to_common_rate(env, audio_rate, motion, fps)
     return estimate_offset(audio_c, motion_c, rate, max_offset_seconds=max_offset_seconds)
+
+
+def detect_speakers(
+    waveform: np.ndarray,
+    sr: int,
+    tracks: list[FaceTrack],
+    detector: ActiveSpeakerDetector | None = None,
+) -> list[SpeakerSegment]:
+    """Detect the active speaker over time from a waveform and a set of face tracks."""
+    env = audio_envelope(waveform, sr)
+    det = detector if detector is not None else ActiveSpeakerDetector()
+    return det.detect(tracks, env, envelope_rate(sr))
